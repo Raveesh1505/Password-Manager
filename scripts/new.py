@@ -9,8 +9,12 @@ Version: 1.0
 import os
 import connection
 from connection import *
+from getpass import getpass
+from lockfile import LockFile
 
 conn, curr = connectDB()
+
+lock = LockFile("scripts/resources/masterPass.txt.lock")
 
 class masterSetup:
     """
@@ -29,6 +33,10 @@ class masterSetup:
 
         masterUserID = input("Enter your master username: ")    # Taking master user ID as input
         masterPIN = input("Enter your master PIN: ")    # Taking master PIN as input
+        
+        # Both userID and PIN will be converted to binaries and will be stored in txt file
+        binUID = ''.join(format(i, '08b') for i in bytearray(masterUserID, encoding ='utf-8'))
+        binPIN = ''.join(format(i, '08b') for i in bytearray(masterPIN, encoding ='utf-8'))
 
         # Printing the details for verification
 
@@ -37,11 +45,13 @@ class masterSetup:
 
         if userConfirmation == 'y':
             
-            # Adding the master login data into the txt file
-            passFile = open("scripts/resources/masterPass.txt", "a")  # Opening file in append mode
-            content = ["{},{}\n".format(masterUserID, masterPIN)]  # Creating a content string
-            passFile.writelines(content)    # Writting the content
-            passFile.close()
+            with lock:
+                # Adding the master login data into the txt file
+                passFile = open("scripts/resources/masterPass.txt", "a")  # Opening file in append mode
+                content = ["{} {}\n".format(binUID, binPIN)]  # Creating a content string
+                passFile.writelines(content)    # Writting the content
+                passFile.close()
+                lock.acquire()
 
             print("\nMaster data added succesfully!!!\n")
 
@@ -58,20 +68,26 @@ class masterSetup:
         from the data stored in masterPass.txt file. 
         """
         global userID  # Globalising the master userID variable for further use
-        userID = input("Enter your master userID: ").strip()    # Taking input from the user for his/her master userID
-        userPIN = input("Enter your master PIN: ").strip()  # Taking input from the user for his/her master PIN
-        
-        with open("scripts/resources/masterPass.txt", "r") as f:
-            for line in f:
-                a,b = line.split(",")
-                b = b.strip()
-                a  = a.strip()
+        userID = input("UserID: ").strip()    # Taking input from the user for his/her master userID
+        userPIN = getpass(prompt="PIN: ")  # Taking input from the user for his/her master PIN
 
-                if (a == userID and b == userPIN):
-                    return True
-                else:
-                    return False
-            f.close()
+        # Converting the input to binaries for comparison
+        binUID = ''.join(format(i, '08b') for i in bytearray(userID, encoding ='utf-8'))
+        binPIN = ''.join(format(i, '08b') for i in bytearray(userPIN, encoding ='utf-8'))
+
+        with lock:
+            with open("scripts/resources/masterPass.txt", "r") as f:
+                for line in f:
+                    a,b = line.split(" ")
+                    b = b.strip()
+                    a  = a.strip()
+
+                    if (a == binUID and b == binPIN):
+                        return True
+                    else:
+                        return False
+                f.close()
+                lock.acquire()
 
 
 def addData():
