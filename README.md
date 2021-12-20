@@ -12,7 +12,8 @@
 
 1. Downlaod the latest version of python on your machine from [python.org](http://python.org).
 2. Download the code and open terminal/command prompt on the folder. 
-3. Run `python3 app.py` in your terminal or CMD.
+3. Run `pip install -r requirements.txt` in your terminal or CMD.
+4. Run `python3 app.py` in your terminal or CMD.
 
 ## Salient features
 
