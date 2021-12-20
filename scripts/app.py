@@ -14,32 +14,42 @@ from new import *
 from search import *
 
 if __name__ == "__main__":
-    print("=====PASSWORD MANAGER=====\n\n1. Setup new user.\n2. Login.\n")
+    
+    # Main menu view
+    print("=====PASSWORD MANAGER=====\n\n1. Setup new user.\n2. Login.\n") 
     userChoice = input("Your choice: ").strip()
+    flag = 0    # If user fails to give correct input, a flag will be raised
+    maxFlag = 3 # Maximum available chances
 
     if userChoice == "1":
-        masterSetup.newUser()
+        print("\n=====NEW USER REGISTRATION=====\n\n")
+        masterSetup.newUser()   # Running new registration script
     
     elif userChoice == "2":
         
-        check = masterSetup.masterLogin()
+        while flag < 3:
+            check = masterSetup.masterLogin()   # Running master login script
 
-        if check == True:
-            print("1. Add a new password\n2. Password search\n3.Password edit\n4. Delete existing password\n")
+            while check == True:
+                print("\n=====MAIN MENU=====\n\n1. Add a new password\n2. Password search\n3. Password edit\n4. Delete existing password\n")
 
-            loginChoice = input("Your choice: ").strip()
+                loginChoice = input("Your choice: ").strip()
 
-            if loginChoice == "1":
-                addData()
-            elif loginChoice == "2":
-                passwordExtraction.releasePass()
-            elif loginChoice == "3":
-                passwordEdit.passEdit()
-            elif loginChoice == "4":
-                passwordEdit.deletePass()
-            else:
-                print("Invalid input")
-        else:
-            print("Invalid username or PIN.")
+                if loginChoice == "1":
+                    print("\n=====NEW PASSWORD ADDITION=====\n\n")
+                    addData()   # Running new data addition script
+                elif loginChoice == "2":
+                    passwordExtraction.releasePass()    # Running password extraction script
+                elif loginChoice == "3":
+                    print("\n=====EDIT PASSWORDS=====\n\n")
+                    passwordEdit.passEdit() # Running password edit script
+                elif loginChoice == "4":
+                    print("\n=====DELETE PASSWORDS=====\n\n")
+                    passwordEdit.deletePass()   # Running password deletion script
+                else:
+                    print("Invalid input")
+            flag += 1
+            print("\nWARNING: Invalid username or PIN. Attempts left: {}".format(maxFlag-flag))
+        print("\nTIMEOUT: You have reached maximum attempts. Please try again later.")
     else:
         print("Invalid input")
